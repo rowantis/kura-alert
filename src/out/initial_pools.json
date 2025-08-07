@@ -1,0 +1,139 @@
+{
+
+  "kuraV2Pools": [
+    {
+      "poolKey": {
+        "token0": "0x5Cf6826140C1C56Ff49C808A1A75407Cd1DF9423",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV2",
+          "isStable": true
+        }
+      },
+      "poolAddress": "0x2BAfdf9e57c348B2b7AF139D57a548D5F450dCAe"
+    },
+    {
+      "poolKey": {
+        "token0": "0xe15fC38F6D8c56aF07bbCBe3BAf5708A2Bf42392",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV2",
+          "isStable": false
+        }
+      },
+      "poolAddress": "0x1362951D5CCC389C04FE14a8A4a2cAA23DB6B2a8"
+    },
+    {
+      "poolKey": {
+        "token0": "0x160345fC359604fC6e70E3c5fAcbdE5F7A9342d8",
+        "token1": "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
+        "dexKey": {
+          "type": "KuraV2",
+          "isStable": false
+        }
+      },
+      "poolAddress": "0x4dc222ac3407C3A25033F355073EC5fE2C8F91fC"
+    }
+  ],
+  "kuraV3Pools": [
+    {
+      "poolKey": {
+        "token0": "0x0555E30da8f98308EdB960aa94C0Db47230d2B9c",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 50
+        }
+      },
+      "poolAddress": "0x62d8d30220Fb817af7288850237d68Ef8820c664"
+    },
+    {
+      "poolKey": {
+        "token0": "0x5Cf6826140C1C56Ff49C808A1A75407Cd1DF9423",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 5
+        }
+      },
+      "poolAddress": "0x9b7372F258aC406BF9898aa5efdD80C4eEC137ea"
+    },
+    {
+      "poolKey": {
+        "token0": "0x5Cf6826140C1C56Ff49C808A1A75407Cd1DF9423",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 10
+        }
+      },
+      "poolAddress": "0x61FF51dFf385f42a4545457741c3197581aC9E82"
+    },
+    {
+      "poolKey": {
+        "token0": "0x160345fC359604fC6e70E3c5fAcbdE5F7A9342d8",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 50
+        }
+      },
+      "poolAddress": "0x3b06Ae59CC8a5765B93C5e6A01a839b8B7525069"
+    },
+    {
+      "poolKey": {
+        "token0": "0x9151434b16b9763660705744891fA906F660EcC5",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 50
+        }
+      },
+      "poolAddress": "0x361cCee286Ba3cb7Ab7af3F193D2c2B47168F89f"
+    },
+    {
+      "poolKey": {
+        "token0": "0xe15fC38F6D8c56aF07bbCBe3BAf5708A2Bf42392",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 10
+        }
+      },
+      "poolAddress": "0x54C6Af87AebFAc5C5a8255971a8815e64f6490a7"
+    },
+    {
+      "poolKey": {
+        "token0": "0xe15fC38F6D8c56aF07bbCBe3BAf5708A2Bf42392",
+        "token1": "0xE30feDd158A2e3b13e9badaeABaFc5516e95e8C7",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 50
+        }
+      },
+      "poolAddress": "0xA77DD803B597E2b9744BCf1eD62755a2BfA686D9"
+    },
+    {
+      "poolKey": {
+        "token0": "0x9151434b16b9763660705744891fA906F660EcC5",
+        "token1": "0xe15fC38F6D8c56aF07bbCBe3BAf5708A2Bf42392",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 5
+        }
+      },
+      "poolAddress": "0x5A8cbf6E7B8917F2b7663758cec671A0705e2511"
+    },
+    {
+      "poolKey": {
+        "token0": "0x3894085Ef7Ff0f0aeDf52E2A2704928d1Ec074F1",
+        "token1": "0xe15fC38F6D8c56aF07bbCBe3BAf5708A2Bf42392",
+        "dexKey": {
+          "type": "KuraV3",
+          "tickSpacing": 10
+        }
+      },
+      "poolAddress": "0xFFeae051C62D87De898da8c17d220b13b2c7Fa4B"
+    }
+  ]
+}
