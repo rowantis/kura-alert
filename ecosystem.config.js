@@ -17,7 +17,7 @@ const common = {
   production: {
     NODE_ENV: 'production',
     WEBHOOK_ALERT_URL:
-      'https://hooks.slack.com/services/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',
+      'https://hooks.slack.com/services/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',
   }
 };
 
