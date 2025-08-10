@@ -37,14 +37,14 @@ export class EventMonitorService {
     this.eventMonitor = new EventMonitor({
       wsUrl,
       poolsData,
-      onSwapEvent: (swapEvent: SwapEvent) => {
-        this.noticeBigSwap(swapEvent);
+      onSwapEvent: async (swapEvent: SwapEvent) => {
+        await this.noticeBigSwap(swapEvent);
       },
-      onAddLiquidityEvent: (addEvent: AddLiquidityEvent) => {
-        this.noticeBigAddLiquidity(addEvent);
+      onAddLiquidityEvent: async (addEvent: AddLiquidityEvent) => {
+        await this.noticeBigAddLiquidity(addEvent);
       },
-      onRemoveLiquidityEvent: (removeEvent: RemoveLiquidityEvent) => {
-        this.noticeBigRemoveLiquidity(removeEvent);
+      onRemoveLiquidityEvent: async (removeEvent: RemoveLiquidityEvent) => {
+        await this.noticeBigRemoveLiquidity(removeEvent);
       },
       onError: (error) => {
         console.error('❌ Monitor error:', error);

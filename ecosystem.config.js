@@ -12,12 +12,12 @@ const common = {
   development: {
     NODE_ENV: 'development',
     WEBHOOK_ALERT_URL:
-      'https://hooks.slack.com/services/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',
+      'https://hooks.slack.com/services/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',
   },
   production: {
     NODE_ENV: 'production',
     WEBHOOK_ALERT_URL:
-      'https://hooks.slack.com/services/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',
+      'https://hooks.slack.com/services/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',
   }
 };
 
