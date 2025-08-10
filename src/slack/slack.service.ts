@@ -2,13 +2,17 @@ import { Injectable } from '@nestjs/common';
 import axios from 'axios';
 import { SlackChannel } from './../utils/enums';
 import { errorWithTime } from 'src/utils/logger';
+import dotenv from 'dotenv';
+dotenv.config();
 
 @Injectable()
 export class SlackService {
   private readonly webhookAlertUrl: string;
 
   constructor() {
-    this.webhookAlertUrl = String(process.env.WEBHOOK_ALERT_URL);
+    this.webhookAlertUrl = process.env.NODE_ENV === 'production' ?
+      String(process.env.PROD_WEBHOOK_ALERT_URL) :
+      String(process.env.DEV_WEBHOOK_ALERT_URL);
   }
 
   async sendMessage(message: string, channel: SlackChannel, userId?: string) {
