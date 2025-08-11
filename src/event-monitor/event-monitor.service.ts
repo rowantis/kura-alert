@@ -82,7 +82,7 @@ export class EventMonitorService {
     const logMessage = [
       this.isWhiteListedSender(sender) ? `💰 [Team-Account] Swap Event over ${amountInUSDThreshold} USD Detected!` : `💰 [Non-Team-Account] Swap Event over ${amountInUSDThreshold} USD Detected!`,
       '='.repeat(50),
-      `💰 Amount in USD: ${amountInUSD}`,
+      `💰 Amount in USD: ${amountInUSD.toFixed(2)}`,
       `🏊 Pool: ${poolDescription(swapEvent.pool)}`,
       `🔄 Direction: ${getTokenSymbol(swapEvent.tokenIn)} → ${getTokenSymbol(swapEvent.tokenOut)}`,
       `📦 Block: ${swapEvent.blockNumber}`,
@@ -157,7 +157,7 @@ export class EventMonitorService {
     const logMessage = [
       this.isWhiteListedSender(sender) ? `💰 [Team-Account] Add Liquidity Event over ${amountInUSDThreshold} USD Detected!` : `💰 [Non-Team-Account] Add Liquidity Event over ${amountInUSDThreshold} USD Detected!`,
       '='.repeat(50),
-      `💰 Amount in USD: ${amountInUSD}`,
+      `💰 Amount in USD: ${amountInUSD.toFixed(2)}`,
       `🏊 Pool: ${poolDescription(addEvent.pool)}`,
       `📦 Block: ${addEvent.blockNumber}`,
       `👤 Sender: ${sender}`,
@@ -172,7 +172,7 @@ export class EventMonitorService {
     const logMessage = [
       this.isWhiteListedSender(sender) ? `💰 [Team-Account] Remove Liquidity Event over ${amountInUSDThreshold} USD Detected!` : `💰 [Non-Team-Account] Remove Liquidity Event over ${amountInUSDThreshold} USD Detected!`,
       '='.repeat(50),
-      `💰 Amount in USD: ${amountInUSD}`,
+      `💰 Amount in USD: ${amountInUSD.toFixed(2)}`,
       `🏊 Pool: ${poolDescription(removeEvent.pool)}`,
       `📦 Block: ${removeEvent.blockNumber}`,
       `👤 Sender: ${sender}`,
