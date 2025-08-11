@@ -78,10 +78,11 @@ export class EventMonitorService {
     return WHITE_LISTED_SENDERS.map(s => s.toLowerCase()).includes(sender.toLowerCase());
   }
 
-  createSwapEventLogMessage(swapEvent: SwapEvent, amountInUSD: number, sender: string) {
+  createSwapEventLogMessage(swapEvent: SwapEvent, amountInUSD: number, amountInUSDThreshold: number, sender: string) {
     const logMessage = [
-      this.isWhiteListedSender(sender) ? `💰 [Team-Account] Swap Event over ${amountInUSD} USD Detected!` : `💰 [Non-Team-Account] Swap Event over ${amountInUSD} USD Detected!`,
+      this.isWhiteListedSender(sender) ? `💰 [Team-Account] Swap Event over ${amountInUSDThreshold} USD Detected!` : `💰 [Non-Team-Account] Swap Event over ${amountInUSDThreshold} USD Detected!`,
       '='.repeat(50),
+      `💰 Amount in USD: ${amountInUSD}`,
       `🏊 Pool: ${poolDescription(swapEvent.pool)}`,
       `🔄 Direction: ${getTokenSymbol(swapEvent.tokenIn)} → ${getTokenSymbol(swapEvent.tokenOut)}`,
       `📦 Block: ${swapEvent.blockNumber}`,
@@ -141,21 +142,22 @@ export class EventMonitorService {
     const sender = await this.getTransactionSender(event);
     let message = '';
     if (eventType === "swap") {
-      message = this.createSwapEventLogMessage(event, amountInUSDThreshold, sender);
+      message = this.createSwapEventLogMessage(event, amountInUSD, amountInUSDThreshold, sender);
     } else if (eventType === "addLiquidity") {
-      message = this.createAddLiquidityEventLogMessage(event, amountInUSDThreshold, sender);
+      message = this.createAddLiquidityEventLogMessage(event, amountInUSD, amountInUSDThreshold, sender);
     } else if (eventType === "removeLiquidity") {
-      message = this.createRemoveLiquidityEventLogMessage(event, amountInUSDThreshold, sender);
+      message = this.createRemoveLiquidityEventLogMessage(event, amountInUSD, amountInUSDThreshold, sender);
     }
     await this.slackService.sendMessage(message, SlackChannel.Alert);
     return true;
   }
 
 
-  createAddLiquidityEventLogMessage(addEvent: AddLiquidityEvent, amountInUSD: number, sender: string) {
+  createAddLiquidityEventLogMessage(addEvent: AddLiquidityEvent, amountInUSD: number, amountInUSDThreshold: number, sender: string) {
     const logMessage = [
-      this.isWhiteListedSender(sender) ? `💰 [Team-Account] Add Liquidity Event over ${amountInUSD} USD Detected!` : `💰 [Non-Team-Account] Add Liquidity Event over ${amountInUSD} USD Detected!`,
+      this.isWhiteListedSender(sender) ? `💰 [Team-Account] Add Liquidity Event over ${amountInUSDThreshold} USD Detected!` : `💰 [Non-Team-Account] Add Liquidity Event over ${amountInUSDThreshold} USD Detected!`,
       '='.repeat(50),
+      `💰 Amount in USD: ${amountInUSD}`,
       `🏊 Pool: ${poolDescription(addEvent.pool)}`,
       `📦 Block: ${addEvent.blockNumber}`,
       `👤 Sender: ${sender}`,
@@ -166,10 +168,11 @@ export class EventMonitorService {
 
     return logMessage;
   }
-  createRemoveLiquidityEventLogMessage(removeEvent: RemoveLiquidityEvent, amountInUSD: number, sender: string) {
+  createRemoveLiquidityEventLogMessage(removeEvent: RemoveLiquidityEvent, amountInUSD: number, amountInUSDThreshold: number, sender: string) {
     const logMessage = [
-      this.isWhiteListedSender(sender) ? `💰 [Team-Account] Remove Liquidity Event over ${amountInUSD} USD Detected!` : `💰 [Non-Team-Account] Remove Liquidity Event over ${amountInUSD} USD Detected!`,
+      this.isWhiteListedSender(sender) ? `💰 [Team-Account] Remove Liquidity Event over ${amountInUSDThreshold} USD Detected!` : `💰 [Non-Team-Account] Remove Liquidity Event over ${amountInUSDThreshold} USD Detected!`,
       '='.repeat(50),
+      `💰 Amount in USD: ${amountInUSD}`,
       `🏊 Pool: ${poolDescription(removeEvent.pool)}`,
       `📦 Block: ${removeEvent.blockNumber}`,
       `👤 Sender: ${sender}`,

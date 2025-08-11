@@ -13,6 +13,7 @@ export class SlackService {
     this.webhookAlertUrl = process.env.NODE_ENV === 'production' ?
       String(process.env.PROD_WEBHOOK_ALERT_URL) :
       String(process.env.DEV_WEBHOOK_ALERT_URL);
+    console.log('this.webhookAlertUrl', this.webhookAlertUrl);
   }
 
   async sendMessage(message: string, channel: SlackChannel, userId?: string) {
