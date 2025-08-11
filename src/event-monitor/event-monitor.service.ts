@@ -1,5 +1,5 @@
 import { Injectable } from "@nestjs/common";
-import { Cron } from "@nestjs/schedule";
+import { Cron, CronExpression } from "@nestjs/schedule";
 import { EventMonitor } from "src/event-monitor/event-monitor";
 import { DexType, PoolData } from "src/utils/kura-alert/types";
 import { getTokenSymbol, TOKEN_PRICES } from "src/utils/kura-alert/utils";
@@ -11,6 +11,7 @@ import { SlackService } from "src/slack/slack.service";
 import { SlackChannel } from "src/utils/enums";
 import { WHITE_LISTED_SENDERS } from "src/utils/constants";
 import { JsonRpcProvider } from "ethers";
+import axios from 'axios';
 
 @Injectable()
 export class EventMonitorService {
@@ -20,6 +21,12 @@ export class EventMonitorService {
 
   private threshold1: number = 10000;
   private threshold2: number = 1000;
+
+  private prices: {
+    [key: string]: number;
+  } = {};
+
+  private readonly TOKEN_PRICE_URL = 'https://d2x575fb6ivzxl.cloudfront.net/tokenPrice.json';
 
   constructor(
     private readonly slackService: SlackService,
@@ -34,6 +41,9 @@ export class EventMonitorService {
     if (!wsUrl) {
       throw new Error('❌ WS_URL is not set');
     }
+
+    await this.updatePrices();
+
     this.eventMonitor = new EventMonitor({
       wsUrl,
       poolsData,
@@ -66,6 +76,38 @@ export class EventMonitorService {
     if (this.isInitialized && this.eventMonitor) {
       this.eventMonitor.ping();
     }
+  }
+
+  @Cron(CronExpression.EVERY_MINUTE)
+  async updatePrices() {
+    try {
+      const response = await axios.get(this.TOKEN_PRICE_URL, { timeout: 10000 });
+      const { data: tokenPrices } = response.data;
+
+      const normalizedTokenPrices: { [key: string]: number } = {};
+      Object.keys(tokenPrices).forEach(key => {
+        normalizedTokenPrices[key.toLowerCase()] = tokenPrices[key];
+      });
+
+      this.prices = { ...this.prices, ...normalizedTokenPrices };
+      console.log(`✅ Updated token prices at ${new Date().toISOString()}`);
+
+    } catch (error) {
+      console.warn(`⚠️ Failed to update token prices: ${error.message}`);
+
+      if (Object.keys(this.prices).length === 0) {
+        const normalizedTokenPrices: { [key: string]: number } = {};
+        Object.keys(TOKEN_PRICES).forEach(key => {
+          normalizedTokenPrices[key.toLowerCase()] = TOKEN_PRICES[key];
+        });
+        this.prices = { ...normalizedTokenPrices };
+      }
+    }
+  }
+
+  private getCurrentPrice(tokenAddress: string): number {
+    const normalizedAddress = tokenAddress.toLowerCase();
+    return this.prices[normalizedAddress] || 0;
   }
 
   async destroy() {
@@ -114,11 +156,11 @@ export class EventMonitorService {
   }) => {
     const { event, eventType } = eventData;
     if (eventType === "swap") {
-      return parseFloat(event.amountIn) * TOKEN_PRICES[event.tokenIn];
+      return parseFloat(event.amountIn) * this.getCurrentPrice(event.tokenIn);
     } else if (eventType === "addLiquidity") {
-      return parseFloat(event.amount0) * TOKEN_PRICES[event.token0] + parseFloat(event.amount1) * TOKEN_PRICES[event.token1];
+      return parseFloat(event.amount0) * this.getCurrentPrice(event.token0) + parseFloat(event.amount1) * this.getCurrentPrice(event.token1);
     } else if (eventType === "removeLiquidity") {
-      return parseFloat(event.amount0) * TOKEN_PRICES[event.token0] + parseFloat(event.amount1) * TOKEN_PRICES[event.token1];
+      return parseFloat(event.amount0) * this.getCurrentPrice(event.token0) + parseFloat(event.amount1) * this.getCurrentPrice(event.token1);
     }
     return 0;
   }
