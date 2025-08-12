@@ -135,10 +135,12 @@ export class EpochKeepingService {
     try {
       const currentPeriod = this.kura.getCurrentPeriod();
       const pools = this.filterPools(this.kura.getPools());
-      pools.forEach(async pool => {
-        if (currentPeriod === this.lastUpdatedPeriod[pool.poolAddress.toLowerCase()]) return;
+
+      // 순차적으로 처리하여 sequence 에러 방지
+      for (const pool of pools) {
+        if (currentPeriod === this.lastUpdatedPeriod[pool.poolAddress.toLowerCase()]) continue;
         await this.updatePool(pool, currentPeriod);
-      });
+      }
     } catch (error) {
       console.error("[updatePools] error", error);
     } finally {
