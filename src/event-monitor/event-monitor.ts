@@ -25,7 +25,7 @@ export class EventMonitor {
 
     const wsConfig: WebSocketConfig = {
       url: config.wsUrl,
-      onConnect: () => { },
+      onConnect: () => this.updateSubscriptions(),
       onDisconnect: (code, reason) => this.handleDisconnect(code, reason),
       onError: (error) => this.handleError(error),
       onMessage: (message) => this.handleMessage(message)

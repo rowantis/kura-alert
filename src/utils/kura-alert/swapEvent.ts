@@ -95,7 +95,6 @@ function parseKuraV2Swap(event: any, pool: PoolInfo): SwapEvent | null {
 
     if (parsedLog && parsedLog.name === 'Swap') {
       const { amount0In, amount1In, amount0Out, amount1Out } = parsedLog.args;
-
       let amountIn: string;
       let amountOut: string;
       let tokenIn: ChecksumAddress;
@@ -151,7 +150,7 @@ function parseKuraV3Swap(event: any, pool: PoolInfo): SwapEvent | null {
       let tokenIn: ChecksumAddress;
       let tokenOut: ChecksumAddress;
 
-      if (BigInt(amount0) > BigInt(0) && BigInt(amount1) < BigInt(0)) {
+      if (BigInt(amount0) > BigInt(0)) {
         // token0 -> token1
         const amountInRaw = BigInt(amount0);
         const amountOutRaw = BigInt(-amount1);
@@ -159,7 +158,7 @@ function parseKuraV3Swap(event: any, pool: PoolInfo): SwapEvent | null {
         tokenOut = pool.poolKey.token1;
         amountIn = ethers.formatUnits(amountInRaw, TOKEN_DECIMALS[tokenIn] || 18);
         amountOut = ethers.formatUnits(amountOutRaw, TOKEN_DECIMALS[tokenOut] || 18);
-      } else if (BigInt(amount1) > BigInt(0) && BigInt(amount0) < BigInt(0)) {
+      } else if (BigInt(amount1) > BigInt(0)) {
         // token1 -> token0
         const amountInRaw = BigInt(amount1);
         const amountOutRaw = BigInt(-amount0);
