@@ -137,11 +137,11 @@ export class EpochKeepingService {
       const isSuccess = await this.roughSwap(pool, fromToken, toToken, amountIn);
       if (!isSuccess) return;
       this.lastUpdatedPeriod[pool.poolAddress.toLowerCase()] = currentPeriod;
-      await this.slackService.sendMessage(`[EpochKeeping] roughSwap success for ${poolDescription(pool)}`, SlackChannel.Alert);
+      await this.slackService.sendMessage(`[EpochKeeping] swap success for the period ${currentPeriod} for ${poolDescription(pool)}`, SlackChannel.Alert);
     } catch (error) {
       console.error(`[EpochKeeping] roughSwap failed for ${poolDescription(pool)}. ${error.message}`);
       if (!this.messageMap[error.message]) {
-        await this.slackService.sendMessage(`[EpochKeeping] roughSwap failed for ${poolDescription(pool)}. ${error.message}`, SlackChannel.Alert);
+        await this.slackService.sendMessage(`[EpochKeeping] swap failed for the period ${currentPeriod} for ${poolDescription(pool)}. ${error.message}`, SlackChannel.Alert);
         this.messageMap[error.message] = true;
       }
     }
