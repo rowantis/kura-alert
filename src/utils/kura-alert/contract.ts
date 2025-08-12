@@ -56,8 +56,8 @@ export const TOKEN_DECIMALS: { [key in ChecksumAddress]: number } = {
   [toChecksumAddress('0x059A6b0bA116c63191182a0956cF697d0d2213eC')]: 18, // syUSD
   [toChecksumAddress('0x37a4dD9CED2b19Cfe8FAC251cd727b5787E45269')]: 18, // fastUSD
   [toChecksumAddress('0xe15fC38F6D8c56aF07bbCBe3BAf5708A2Bf42392')]: 6, // USDC circle
-  [toChecksumAddress('0x4b416A45e1f26a53D2ee82a50a4C7D7bE9EdA9E4')]: 6, // KURA
-  [toChecksumAddress('0x8A200a13c1321fdc7F6c7AFba1494E1949426eFD')]: 6, // K33
+  [toChecksumAddress('0x4b416A45e1f26a53D2ee82a50a4C7D7bE9EdA9E4')]: 18, // KURA
+  [toChecksumAddress('0x8A200a13c1321fdc7F6c7AFba1494E1949426eFD')]: 18, // K33
 };
 
 export const TOKEN_SYMBOLS: { [key in ChecksumAddress]: string } = {
