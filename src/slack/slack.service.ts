@@ -17,7 +17,7 @@ export class SlackService {
 
     this.webhookAlertUrl = process.env.NODE_ENV === 'production' ?
       String(process.env.PROD_WEBHOOK_ALERT_URL) :
-      String(process.env.DEV_WEBHOOK_ALERT_URL);
+      String(process.env.DEV_WEBHOOK_URL);
 
     console.log('this.webhookTradingUrl', this.webhookTradingUrl);
     console.log('this.webhookAlertUrl', this.webhookAlertUrl);
