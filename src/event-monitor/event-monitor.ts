@@ -4,7 +4,7 @@ import { WebSocketManager, WebSocketConfig } from '../utils/websocket-manager';
 
 export interface SwapEventMonitorConfig {
   wsUrl: string;
-  poolsData: PoolData;
+  pools: PoolInfo[];
   onSwapEvent?: (swapEvent: SwapEvent) => void;
   onAddLiquidityEvent?: (addEvent: AddLiquidityEvent) => void;
   onRemoveLiquidityEvent?: (removeEvent: RemoveLiquidityEvent) => void;
@@ -18,14 +18,14 @@ export class EventMonitor {
 
   constructor(config: SwapEventMonitorConfig) {
     this.config = config;
-    this.allPools = [
-      ...config.poolsData.kuraV2Pools,
-      ...config.poolsData.kuraV3Pools,
-    ];
+    this.allPools = config.pools;
+    if (this.allPools.length === 0) {
+      throw new Error('❌ Pools data is not available');
+    }
 
     const wsConfig: WebSocketConfig = {
       url: config.wsUrl,
-      onConnect: () => this.handleConnect(),
+      onConnect: () => { },
       onDisconnect: (code, reason) => this.handleDisconnect(code, reason),
       onError: (error) => this.handleError(error),
       onMessage: (message) => this.handleMessage(message)
@@ -42,7 +42,7 @@ export class EventMonitor {
     this.wsManager.disconnect();
   }
 
-  private handleConnect(): void {
+  private updateSubscriptions(): void {
     const subscriptions: { contractAddress: string, abi: any, eventName: string }[] = [];
     this.allPools.forEach(pool => {
       const abi = ABI_FOR_DEX_TYPE[pool.poolKey.dexKey.type];
@@ -105,6 +105,12 @@ export class EventMonitor {
 
   public getReconnectAttempts(): number {
     return this.wsManager.getReconnectAttempts();
+  }
+
+  public updatePools(pools: PoolInfo[]): void {
+    if (this.allPools.length === pools.length) return;
+    this.allPools = pools;
+    this.updateSubscriptions();
   }
 
   public ping(): void {

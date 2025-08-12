@@ -1,17 +1,15 @@
 import { Injectable } from "@nestjs/common";
 import { Cron, CronExpression } from "@nestjs/schedule";
 import { EventMonitor } from "src/event-monitor/event-monitor";
-import { DexType, PoolData } from "src/utils/kura-alert/types";
-import { getTokenSymbol, TOKEN_PRICES } from "src/utils/kura-alert/utils";
+import { getTokenSymbol } from "src/utils/kura-alert/utils";
 import { poolDescription } from "src/utils/pool";
-import { PATHS } from "src/utils/kura-alert/contract";
-import * as fs from 'fs';
 import { AddLiquidityEvent, RemoveLiquidityEvent, SwapEvent } from "src/utils/kura-alert/swapEvent";
 import { SlackService } from "src/slack/slack.service";
 import { SlackChannel } from "src/utils/enums";
 import { WHITE_LISTED_SENDERS } from "src/utils/constants";
 import { JsonRpcProvider } from "ethers";
-import axios from 'axios';
+import { KuraService } from "src/kura/kura.service";
+import { toChecksumAddress } from "src/utils/kura-alert/address";
 
 @Injectable()
 export class EventMonitorService {
@@ -19,34 +17,41 @@ export class EventMonitorService {
   private isInitialized: boolean = false;
   public url: string;
 
-  private threshold1: number = 10000;
-  private threshold2: number = 1000;
-
-  private prices: {
-    [key: string]: number;
-  } = {};
-
-  private readonly TOKEN_PRICE_URL = 'https://d2x575fb6ivzxl.cloudfront.net/tokenPrice.json';
+  private threshold1: number = process.env.NODE_ENV === 'production' ? 10000 : 1;
+  private threshold2: number = process.env.NODE_ENV === 'production' ? 1000 : 0.1;
 
   constructor(
     private readonly slackService: SlackService,
+    private readonly kura: KuraService,
   ) { }
 
   async init() {
     if (this.isInitialized) return;
-    const poolsData: PoolData = JSON.parse(fs.readFileSync(PATHS.VALID_POOLS, 'utf8'));
-    console.log(`📊 Loaded pools: ${poolsData.kuraV2Pools.length} KuraV2, ${poolsData.kuraV3Pools.length} KuraV3`);
+
+    // 풀 데이터가 준비될 때까지 폴링
+    let pools = this.kura.getPools();
+    let retryCount = 0;
+    while (pools.length === 0 && retryCount < 10) {
+      console.log('⏳ Waiting for pools data to be available...');
+      await new Promise(resolve => setTimeout(resolve, 2000)); // 2초 대기
+      pools = this.kura.getPools();
+      retryCount++;
+    }
+    if (pools.length === 0) {
+      throw new Error('❌ Pools data is not available after 20 seconds');
+    }
+
+    console.log(`📊 Pools data ready: ${pools.length} pools available`);
+
     const wsUrl = process.env.NODE_RPC_URLS?.split(',')[0];
     this.url = wsUrl || '';
     if (!wsUrl) {
       throw new Error('❌ WS_URL is not set');
     }
 
-    await this.updatePrices();
-
     this.eventMonitor = new EventMonitor({
       wsUrl,
-      poolsData,
+      pools,
       onSwapEvent: async (swapEvent: SwapEvent) => {
         await this.noticeBigSwap(swapEvent);
       },
@@ -66,7 +71,13 @@ export class EventMonitorService {
 
     process.on('SIGINT', () => {
       console.log('\n🛑 Stopping event monitor...');
-      this.eventMonitor.stop();
+      this.destroy();
+      process.exit(0);
+    });
+
+    process.on('SIGTERM', () => {
+      console.log('\n🛑 Stopping event monitor...');
+      this.destroy();
       process.exit(0);
     });
   }
@@ -78,36 +89,10 @@ export class EventMonitorService {
     }
   }
 
-  @Cron(CronExpression.EVERY_MINUTE)
-  async updatePrices() {
-    try {
-      const response = await axios.get(this.TOKEN_PRICE_URL, { timeout: 10000 });
-      const { data: tokenPrices } = response.data;
-
-      const normalizedTokenPrices: { [key: string]: number } = {};
-      Object.keys(tokenPrices).forEach(key => {
-        normalizedTokenPrices[key.toLowerCase()] = tokenPrices[key];
-      });
-
-      this.prices = { ...this.prices, ...normalizedTokenPrices };
-      console.log(`✅ Updated token prices at ${new Date().toISOString()}`);
-
-    } catch (error) {
-      console.warn(`⚠️ Failed to update token prices: ${error.message}`);
-
-      if (Object.keys(this.prices).length === 0) {
-        const normalizedTokenPrices: { [key: string]: number } = {};
-        Object.keys(TOKEN_PRICES).forEach(key => {
-          normalizedTokenPrices[key.toLowerCase()] = TOKEN_PRICES[key];
-        });
-        this.prices = { ...normalizedTokenPrices };
-      }
-    }
-  }
-
-  private getCurrentPrice(tokenAddress: string): number {
-    const normalizedAddress = tokenAddress.toLowerCase();
-    return this.prices[normalizedAddress] || 0;
+  @Cron(CronExpression.EVERY_HOUR) // Every hour
+  async updatePools() {
+    const pools = this.kura.getPools();
+    this.eventMonitor.updatePools(pools);
   }
 
   async destroy() {
@@ -117,7 +102,7 @@ export class EventMonitorService {
   }
 
   isWhiteListedSender(sender: string): boolean {
-    return WHITE_LISTED_SENDERS.map(s => s.toLowerCase()).includes(sender.toLowerCase());
+    return WHITE_LISTED_SENDERS.includes(toChecksumAddress(sender));
   }
 
   createSwapEventLogMessage(swapEvent: SwapEvent, amountInUSD: number, amountInUSDThreshold: number, sender: string) {
@@ -156,11 +141,11 @@ export class EventMonitorService {
   }) => {
     const { event, eventType } = eventData;
     if (eventType === "swap") {
-      return parseFloat(event.amountIn) * this.getCurrentPrice(event.tokenIn);
+      return parseFloat(event.amountIn) * this.kura.getCurrentPrice(event.tokenIn);
     } else if (eventType === "addLiquidity") {
-      return parseFloat(event.amount0) * this.getCurrentPrice(event.token0) + parseFloat(event.amount1) * this.getCurrentPrice(event.token1);
+      return parseFloat(event.amount0) * this.kura.getCurrentPrice(event.token0) + parseFloat(event.amount1) * this.kura.getCurrentPrice(event.token1);
     } else if (eventType === "removeLiquidity") {
-      return parseFloat(event.amount0) * this.getCurrentPrice(event.token0) + parseFloat(event.amount1) * this.getCurrentPrice(event.token1);
+      return parseFloat(event.amount0) * this.kura.getCurrentPrice(event.token0) + parseFloat(event.amount1) * this.kura.getCurrentPrice(event.token1);
     }
     return 0;
   }
@@ -190,7 +175,7 @@ export class EventMonitorService {
     } else if (eventType === "removeLiquidity") {
       message = this.createRemoveLiquidityEventLogMessage(event, amountInUSD, amountInUSDThreshold, sender);
     }
-    await this.slackService.sendMessage(message, SlackChannel.Alert);
+    await this.slackService.sendMessage(message, SlackChannel.Trading);
     return true;
   }
 

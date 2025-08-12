@@ -1,5 +1,6 @@
 import { Injectable, OnModuleInit, OnModuleDestroy } from '@nestjs/common';
 import { EventMonitorService } from './event-monitor/event-monitor.service';
+import { EpochKeepingService } from './epoch-keeping/epoch-keeping.service';
 
 @Injectable()
 export class AppService implements OnModuleInit, OnModuleDestroy {
@@ -7,6 +8,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
 
   constructor(
     private readonly swapEventMonitorService: EventMonitorService,
+    private readonly swapService: EpochKeepingService,
   ) {
     const shutdown = async (signal: string) => {
       console.log("shutting down")
@@ -14,6 +16,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
       this.isShuttingDown = true;
       try {
         await this.swapEventMonitorService.destroy();
+        await this.swapService.destroy();
       } catch (e) {
       } finally {
         process.exit(0);
@@ -29,6 +32,7 @@ export class AppService implements OnModuleInit, OnModuleDestroy {
 
   onModuleInit() {
     this.swapEventMonitorService.init();
+    this.swapService.init();
   }
 
   async onModuleDestroy() {

@@ -13,14 +13,14 @@ export type DexKey = {
 }
 
 export interface PoolKey {
-  token0: string;
-  token1: string;
+  token0: ChecksumAddress;
+  token1: ChecksumAddress;
   dexKey: DexKey;
 }
 
 export interface PoolInfo {
   poolKey: PoolKey;
-  poolAddress: string;
+  poolAddress: ChecksumAddress;
   tvl: number;
 }
 
@@ -35,3 +35,9 @@ export interface PoolData {
     totalPools: number;
   };
 }
+
+// Checksum address를 강제하는 브랜드 타입
+export type ChecksumAddress = string & { readonly __brand: 'ChecksumAddress' };
+
+// 기존 Address 타입을 ChecksumAddress로 변경
+export type Address = ChecksumAddress;

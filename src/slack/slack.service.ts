@@ -7,12 +7,19 @@ dotenv.config();
 
 @Injectable()
 export class SlackService {
+  private readonly webhookTradingUrl: string;
   private readonly webhookAlertUrl: string;
 
   constructor() {
+    this.webhookTradingUrl = process.env.NODE_ENV === 'production' ?
+      String(process.env.PROD_WEBHOOK_TRADING_URL) :
+      String(process.env.DEV_WEBHOOK_URL);
+
     this.webhookAlertUrl = process.env.NODE_ENV === 'production' ?
       String(process.env.PROD_WEBHOOK_ALERT_URL) :
       String(process.env.DEV_WEBHOOK_ALERT_URL);
+
+    console.log('this.webhookTradingUrl', this.webhookTradingUrl);
     console.log('this.webhookAlertUrl', this.webhookAlertUrl);
   }
 
@@ -24,7 +31,10 @@ export class SlackService {
     const payload = { text: taggedMessage };
 
     try {
-      if (channel === SlackChannel.Alert) {
+      if (channel === SlackChannel.Trading) {
+        const response = await axios.post(this.webhookTradingUrl, payload);
+        return response.data;
+      } else if (channel === SlackChannel.Alert) {
         const response = await axios.post(this.webhookAlertUrl, payload);
         return response.data;
       } else {

@@ -1,5 +1,5 @@
 import { ethers } from 'ethers';
-import { PoolInfo, PoolData, DexType } from './types';
+import { PoolInfo, PoolData, DexType, ChecksumAddress } from './types';
 import {
   KURA_V2_FACTORY,
   KURA_V3_FACTORY,
@@ -19,6 +19,7 @@ import {
 import ERC20ABI from './abis/ERC20.json';
 import IKuraV2FactoryABI from './abis/IPairFactory.json';
 import IKuraV3FactoryABI from './abis/IRamsesV3Factory.json';
+import { toChecksumAddress } from './address';
 
 export class PoolFinder {
   private provider: ethers.Provider;
@@ -35,8 +36,8 @@ export class PoolFinder {
     this.kuraV3Factory = new ethers.Contract(KURA_V3_FACTORY, IKuraV3FactoryABI, this.provider);
   }
   async checkKuraV2Pool(
-    tokenA: string,
-    tokenB: string,
+    tokenA: ChecksumAddress,
+    tokenB: ChecksumAddress,
     stable: boolean,
     tvlFilter: number
   ): Promise<PoolInfo | null> {
@@ -66,7 +67,7 @@ export class PoolFinder {
         console.log("add pool ", pair);
 
         return {
-          poolKey: createPoolKey(tokenA, tokenB, { type: DexType.KuraV2, isStable: stable }),
+          poolKey: createPoolKey(toChecksumAddress(tokenA), toChecksumAddress(tokenB), { type: DexType.KuraV2, isStable: stable }),
           poolAddress: pair,
           tvl: tvl,
         };
@@ -86,8 +87,8 @@ export class PoolFinder {
   }
 
   async checkKuraV3Pool(
-    tokenA: string,
-    tokenB: string,
+    tokenA: ChecksumAddress,
+    tokenB: ChecksumAddress,
     tickSpacing: KURA_V3_TICK_SPACING,
     tvlFilter: number
   ): Promise<PoolInfo | null> {
@@ -115,7 +116,7 @@ export class PoolFinder {
         };
         console.log("add pool ", pool);
         return {
-          poolKey: createPoolKey(tokenA, tokenB, { type: DexType.KuraV3, tickSpacing }),
+          poolKey: createPoolKey(toChecksumAddress(tokenA), toChecksumAddress(tokenB), { type: DexType.KuraV3, tickSpacing }),
           poolAddress: pool,
           tvl: tvl,
         };

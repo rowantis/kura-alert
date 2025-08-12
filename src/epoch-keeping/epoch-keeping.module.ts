@@ -1,11 +1,11 @@
 import { Module } from '@nestjs/common';
-import { EventMonitorService } from './event-monitor.service';
+import { EpochKeepingService } from './epoch-keeping.service';
 import { SlackModule } from 'src/slack/slack.module';
 import { KuraModule } from 'src/kura/kura.module';
 
 @Module({
   imports: [SlackModule, KuraModule],
-  providers: [EventMonitorService],
-  exports: [EventMonitorService],
+  providers: [EpochKeepingService],
+  exports: [EpochKeepingService],
 })
-export class EventMonitorModule { }
+export class EpochKeepingModule { }

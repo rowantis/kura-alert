@@ -1,13 +1,14 @@
 import { ethers } from 'ethers';
 import { TOKEN_DECIMALS } from './contract';
-import { DexType, PoolInfo } from './types';
+import { ChecksumAddress, DexType, PoolInfo } from './types';
 import IPairAbi from './abis/IPair.json';
 import IRamsesV3PoolAbi from './abis/IRamsesV3Pool.json';
+import { toChecksumAddress } from './address';
 
 export interface SwapEvent {
   pool: PoolInfo;
-  tokenIn: string;
-  tokenOut: string;
+  tokenIn: ChecksumAddress;
+  tokenOut: ChecksumAddress;
   amountIn: string;
   amountOut: string;
   blockNumber: number;
@@ -16,8 +17,8 @@ export interface SwapEvent {
 
 export interface AddLiquidityEvent {
   pool: PoolInfo;
-  token0: string;
-  token1: string;
+  token0: ChecksumAddress;
+  token1: ChecksumAddress;
   amount0: string;
   amount1: string;
   blockNumber: number;
@@ -26,8 +27,8 @@ export interface AddLiquidityEvent {
 
 export interface RemoveLiquidityEvent {
   pool: PoolInfo;
-  token0: string;
-  token1: string;
+  token0: ChecksumAddress;
+  token1: ChecksumAddress;
   amount0: string;
   amount1: string;
   blockNumber: number;
@@ -97,8 +98,8 @@ function parseKuraV2Swap(event: any, pool: PoolInfo): SwapEvent | null {
 
       let amountIn: string;
       let amountOut: string;
-      let tokenIn: string;
-      let tokenOut: string;
+      let tokenIn: ChecksumAddress;
+      let tokenOut: ChecksumAddress;
 
       if (BigInt(amount0In) > BigInt(0) && BigInt(amount1In) === BigInt(0)) {
         const amountInRaw = BigInt(amount0In);
@@ -147,8 +148,8 @@ function parseKuraV3Swap(event: any, pool: PoolInfo): SwapEvent | null {
 
       let amountIn: string;
       let amountOut: string;
-      let tokenIn: string;
-      let tokenOut: string;
+      let tokenIn: ChecksumAddress;
+      let tokenOut: ChecksumAddress;
 
       if (BigInt(amount0) > BigInt(0) && BigInt(amount1) < BigInt(0)) {
         // token0 -> token1
