@@ -79,24 +79,6 @@ export class EpochKeepingService {
       await this.destroy();
       process.exit(0);
     });
-
-    await this.roughSwap(
-      {
-        poolAddress: toChecksumAddress("0x6a824f9b8035eb132539865b9158c84d57d0697e"),
-        poolKey: {
-          token0: toChecksumAddress("0xe15fc38f6d8c56af07bbcbe3baf5708a2bf42392"),
-          token1: toChecksumAddress("0xe30fedd158a2e3b13e9badaeabafc5516e95e8c7"),
-          dexKey: {
-            type: DexType.KuraV3,
-            tickSpacing: 200,
-          },
-        },
-        tvl: 0,
-      },
-      toChecksumAddress("0xe30fedd158a2e3b13e9badaeabafc5516e95e8c7"),
-      toChecksumAddress("0xe15fc38f6d8c56af07bbcbe3baf5708a2bf42392"),
-      parseUnits("0.08", 6).toString()
-    )
   }
 
   async destroy() {
