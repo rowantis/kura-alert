@@ -1,6 +1,7 @@
 import { Injectable } from "@nestjs/common";
 import { KURA_SWAP_ROUTER, PATHS, TOKEN_DECIMALS } from "src/utils/kura-alert/contract";
 import fs from "fs";
+import path from "path";
 import { DexType, PoolInfo, ChecksumAddress } from "src/utils/kura-alert/types";
 import { call, sendTransaction } from "../utils/blockchain";
 import { ethers, formatUnits, parseUnits } from "ethers";
@@ -57,8 +58,15 @@ export class EpochKeepingService {
   async init() {
     if (this.isInitialized) return;
     this.isInitialized = true;
-    this.lastUpdatedPeriod = JSON.parse(fs.readFileSync(PATHS.LAST_UPDATED_PERIOD, 'utf8'));
-    console.log('🔄 Loaded last updated period');
+
+    try {
+      this.lastUpdatedPeriod = JSON.parse(fs.readFileSync(PATHS.LAST_UPDATED_PERIOD, 'utf8'));
+      console.log('🔄 Loaded last updated period');
+    } catch (error) {
+      // 파일이 없거나 읽기 실패 시 빈 객체로 초기화
+      this.lastUpdatedPeriod = {};
+      console.log('🔄 Initialized with empty last updated period');
+    }
 
     process.on('SIGINT', async () => {
       console.log('\n🛑 Stopping event monitor...');
@@ -94,8 +102,18 @@ export class EpochKeepingService {
   async destroy() {
     if (!this.isInitialized) return;
     this.isInitialized = false;
-    fs.writeFileSync(PATHS.LAST_UPDATED_PERIOD, JSON.stringify(this.lastUpdatedPeriod));
-    console.log('🔄 Updated last updated period');
+
+    try {
+      const dir = path.dirname(PATHS.LAST_UPDATED_PERIOD);
+      if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir, { recursive: true });
+      }
+
+      fs.writeFileSync(PATHS.LAST_UPDATED_PERIOD, JSON.stringify(this.lastUpdatedPeriod));
+      console.log('🔄 Updated last updated period');
+    } catch (error) {
+      console.error('❌ Failed to save last updated period:', error.message);
+    }
   }
 
   private filterPools(pools: PoolInfo[]) {
